@@ -77,10 +77,11 @@ sub _split_path {
   my ($self, $path) = @_;
   my @path = split m!/!, $path;
   my @leftover;
-  while (@path and ! $self->_comp_root_find(
-    $self->interp->comp_root,
-    File::Spec->catfile(@path),
-  )) {
+  while (@path and not 
+           $self->interp->comp_exists(
+             File::Spec->catfile(@path),
+           )
+         ) {
     unshift @leftover, pop @path;
   }
 
@@ -89,20 +90,6 @@ sub _split_path {
   # add an extra '' because we implicitly lost a '/' to split
   # XXX is this always true?
   return File::Spec->catfile(@path), join '/', '', @leftover;
-}
-
-sub __comp_root {
-  my $comp_root = shift;
-  return $comp_root if ref $comp_root eq 'ARRAY';
-  return [ [ only_comp_root => $comp_root ] ];
-}
-
-sub _comp_root_find {
-  my ($self, $comp_root, $path) = @_;
-  for my $dir (map { $_->[1] } @{ __comp_root($comp_root) }) {
-    return $dir if -e File::Spec->catfile($dir, $path);
-  }
-  return;
 }
 
 =head1 AUTHOR
