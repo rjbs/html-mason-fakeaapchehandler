@@ -33,28 +33,46 @@ my @TESTS = (
   ],
 );
 
-plan tests => @TESTS * 2;
+plan tests => @TESTS * 4;
 
-for my $Test (@TESTS) {
-  my ($name, $status, $path, $expect) = @$Test;
-  
-  my $request = HTTP::Request->new( GET => "http://localhost.localdomain$path" );
-
+sub handle_ok {
+  my ($request, $handler, $name, $test) = @_;
+  my $status = $test->{status};
+  my $expect = $test->{expect};
   my $response;
   {
     my $c = HTTP::Request::AsCGI->new($request)->setup;
-    
     my $mason = $HANDLER->new(
       data_dir  => File::Spec->rel2abs('./data'),
       comp_root => [ [ test_root => File::Spec->rel2abs('./t/root') ] ],
       error_mode => 'fatal',
     );
     
-    eval { $mason->handle_request };
+    eval { $handler->($mason) };
     $c->restore;
     $response = $c->response;
   }
-  
+
   is   $response->code,    $status, "$name: status code is $status";
   like $response->content, $expect, "$name: content matches $expect";
+}
+
+for my $Test (@TESTS) {
+  for my $handler (
+    [ basic  => sub { shift->handle_request } ],
+    [ cgi    => sub { shift->handle_cgi_object(CGI->new) } ],
+  ) {
+    my ($name, $code) = @$handler;
+    my ($base_name, $status, $path, $expect) = @$Test;
+    
+    
+    my $request = HTTP::Request->new( GET => "http://localhost.localdomain$path" );
+    handle_ok(
+      $request, $code, "$base_name/$name",
+      {
+        status => $status,
+        expect => $expect,
+      },
+    );
+  }
 }

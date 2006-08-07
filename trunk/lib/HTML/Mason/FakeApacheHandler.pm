@@ -41,12 +41,41 @@ not exist:
 
 =back
 
+=head2 handle_cgi_object
+
+See L<C<handle_request>|/handle_request>.
+
 =cut
 
 sub handle_request {
   my $self = shift;
 
-  my @path = split m!/!, $ENV{PATH_INFO};
+  my ($comp, $path) = $self->_split_path($ENV{PATH_INFO});
+  # if we couldn't find a component, let mason handle it
+  return $self->SUPER::handle_request(@_) unless defined $comp;
+
+  $ENV{PATH_INFO} = $path;
+  return $self->_handler({ comp => $comp }, @_);
+}
+
+sub handle_cgi_object {
+  my ($self, $cgi) = (shift, shift);
+
+  my ($comp, $path) = $self->_split_path($cgi->path_info);
+  return $self->SUPER::handle_cgi_object($cgi, @_) unless defined $comp;
+
+  # set ENV also because some components are dumb
+  $ENV{PATH_INFO} = $path;
+  $cgi->path_info($path);
+  return $self->_handler({
+    comp => $comp,
+    cgi  => $cgi,
+  }, @_);
+}
+
+sub _split_path {
+  my ($self, $path) = @_;
+  my @path = split m!/!, $path;
   my @leftover;
   while (@path and ! $self->_comp_root_find(
     $self->interp->comp_root,
@@ -54,20 +83,12 @@ sub handle_request {
   )) {
     unshift @leftover, pop @path;
   }
-  # let mason handle not found
-  my $comp = $ENV{PATH_INFO};
 
-  if (@path) {
-    $comp = File::Spec->catfile(@path);
-    # is this important?
-    #$ENV{SCRIPT_NAME} = join '/', $ENV{SCRIPT_NAME}, @path;
+  return unless @path;
 
-    # add an extra '' because we implicitly lost a '/' to split
-    # XXX is this always true?
-    $ENV{PATH_INFO}   = join '/', '', @leftover;
-  }
-
-  return $self->_handler({ comp => $comp }, @_);
+  # add an extra '' because we implicitly lost a '/' to split
+  # XXX is this always true?
+  return File::Spec->catfile(@path), join '/', '', @leftover;
 }
 
 sub __comp_root {
