@@ -16,7 +16,7 @@ my $HANDLER = 'HTML::Mason::FakeApacheHandler';
 
 my @TESTS = (
   [ 'basic', 200, '/index.html',    
-    qr{^path: /index.html$},
+    qr{^path: /index\.html$},
   ],
 
 # this doesn't really test this particular module's functionality
@@ -25,11 +25,20 @@ my @TESTS = (
 #  ],
 
   [ 'path', 200, '/index.html/foo',
-    qr{^path: /index.html\npath_info: /foo$},
+    qr{^path: /index\.html\npath_info: /foo$},
   ],
 
   [ 'two slashes', 200, '/index.html/http://foo.com',
-    qr{^path: /index.html\npath_info: /http://foo.com$},
+    qr{^path: /index\.html\npath_info: /http://foo\.com$},
+  ],
+
+  [ 'self url', 200, '/selfurl.html',
+    qr{^http://localhost\.localdomain:80/selfurl\.html$},
+  ],
+
+  [ 'self url path', 200, '/selfurl.html/foo',
+    qr{^http://localhost\.localdomain:80/selfurl\.html/foo
+       \n /foo $}x,
   ],
 );
 

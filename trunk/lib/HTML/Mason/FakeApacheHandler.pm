@@ -54,7 +54,8 @@ sub handle_request {
   # if we couldn't find a component, let mason handle it
   return $self->SUPER::handle_request(@_) unless defined $comp;
 
-  $ENV{PATH_INFO} = $path;
+  $ENV{PATH_INFO}    = $path;
+  $ENV{SCRIPT_NAME} .= $comp;
   return $self->_handler({ comp => $comp }, @_);
 }
 
@@ -65,7 +66,8 @@ sub handle_cgi_object {
   return $self->SUPER::handle_cgi_object($cgi, @_) unless defined $comp;
 
   # set ENV also because some components are dumb
-  $ENV{PATH_INFO} = $path;
+  $ENV{PATH_INFO}    = $path;
+  $ENV{SCRIPT_NAME} .= $comp;
   $cgi->path_info($path);
   return $self->_handler({
     comp => $comp,
