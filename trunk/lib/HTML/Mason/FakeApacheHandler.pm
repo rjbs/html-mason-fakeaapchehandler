@@ -65,10 +65,22 @@ sub handle_cgi_object {
   my ($comp, $path) = $self->_split_path($cgi->path_info);
   return $self->SUPER::handle_cgi_object($cgi, @_) unless defined $comp;
 
-  # set ENV also because some components are dumb
+  # this is here to demonstrate that setting script_name,
+  # below, is necessary
+  my $unused = $cgi->script_name;
+
+  my $comp_script_name = $comp;
+  $comp_script_name =~ s{^/}{} if $cgi->script_name =~ m{/$};
+  
+  # set ENV also because some components may look at it
   $ENV{PATH_INFO}    = $path;
-  $ENV{SCRIPT_NAME} .= $comp;
+  $ENV{SCRIPT_NAME} .= $comp_script_name;
   $cgi->path_info($path);
+
+  # XXX see http://rt.cpan.org//Ticket/Display.html?id=20895
+  #$cgi->script_name( $script_name . $comp_script_name );
+  $cgi->{'.script_name'} = $cgi->script_name . $comp_script_name;
+
   return $self->_handler({
     comp => $comp,
     cgi  => $cgi,

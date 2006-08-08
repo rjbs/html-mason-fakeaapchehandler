@@ -32,12 +32,12 @@ my @TESTS = (
     qr{^path: /index\.html\npath_info: /http://foo\.com$},
   ],
 
-  [ 'self url', 200, '/selfurl.html',
-    qr{^http://localhost\.localdomain:80/selfurl\.html$},
+  [ 'self url', 200, '/r/selfurl.html',
+    qr{^http://localhost\.localdomain:80/r/selfurl\.html$},
   ],
 
-  [ 'self url path', 200, '/selfurl.html/foo',
-    qr{^http://localhost\.localdomain:80/selfurl\.html/foo
+  [ 'self url path', 200, '/r/selfurl.html/foo',
+    qr{^http://localhost\.localdomain:80/r/selfurl\.html/foo
        \n /foo $}x,
   ],
 );
