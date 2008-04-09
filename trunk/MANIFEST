@@ -8,4 +8,5 @@ t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
 t/root/index.html
+t/root/r/selfurl.html
 t/path_info.t
