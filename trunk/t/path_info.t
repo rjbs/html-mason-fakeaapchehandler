@@ -33,11 +33,11 @@ my @TESTS = (
   ],
 
   [ 'self url', 200, '/r/selfurl.html',
-    qr{^http://localhost\.localdomain:80/r/selfurl\.html$},
+    qr{^http://localhost\.localdomain/r/selfurl\.html$},
   ],
 
   [ 'self url path', 200, '/r/selfurl.html/foo',
-    qr{^http://localhost\.localdomain:80/r/selfurl\.html/foo
+    qr{^http://localhost\.localdomain/r/selfurl\.html/foo
        \n /foo $}x,
   ],
 );
